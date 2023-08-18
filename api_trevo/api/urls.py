@@ -8,4 +8,6 @@ urlpatterns = [
     path('users/<int:user_id>', views.get_user, name='get_user'),
     path('users/<int:user_id>/update', views.update_user, name='get_user'),
     path('users/<int:user_id>/delete', views.delete_user, name='get_user'),
+
+    path('raffles/<int:combo_number>', views.create_raffles_combo_number, name='create_raffles_combo_number')
 ]

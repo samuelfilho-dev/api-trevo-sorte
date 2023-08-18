@@ -1,14 +1,16 @@
+from django.urls import reverse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 from .models import UserModel
 from .models import Payment
+from .models import RaffleTicket
 from .serializer import UserModelSerializer
 from .mp_service import generate_payment
+from datetime import datetime
 
 import numpy as np
 
-# Create your views here.
 
 @api_view(['GET'])
 def get_routes(request):
@@ -62,6 +64,9 @@ def create_user(request):
     email = data['email']
     phone = data['phone']
     password = data['password']
+    combo_number = data['combo_number']
+
+    value = get_value(combo_number)
 
     new_user = UserModel.objects.create(
         name=name,
@@ -70,7 +75,10 @@ def create_user(request):
         password=password,
     )
 
-    payment = create_payment(email=email, value=0.01, user=new_user)
+    create_payment(email=email, value=value, user=new_user)
+
+    raffles_combo_number = create_combo_number(combo_number=combo_number)
+    crate_raffle_ticket(combo_number=combo_number, raffles_combo_number=raffles_combo_number, user=new_user)
 
     serializer = UserModelSerializer(new_user)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -95,8 +103,56 @@ def create_payment(value, email, user):
     return new_payment
 
 
-def create_raffle(request):
-    raflle = [raffle for raffle in range(100_001)]
+@api_view(['GET'])
+def create_raffles_combo_number(request, combo_number):
+    raffles_combo_number = create_combo_number(combo_number)
+    return Response(raffles_combo_number, status=status.HTTP_200_OK)
+
+
+def crate_raffle_ticket(combo_number, raffles_combo_number, user):
+    new_raffle_ticket = RaffleTicket.objects.create(
+        combo_name=f'Combo: {combo_number}',
+        combo_number=combo_number,
+        raffle=raffles_combo_number,
+        user_id=user.id
+    )
+
+    return new_raffle_ticket
+
+
+def create_combo_number(combo_number):
+    raffles = [raffle for raffle in range(100_001)]
     # Add Filter Rules
 
-    return Response(raflle, status=status.HTTP_200_OK)
+    if combo_number not in [5, 10, 15, 30, 50, 100]:
+        return Response({'message:': 'This Combo Number is not exists', 'datetime': datetime.now()},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    raffles_combo_number = np.random.choice(raffles, combo_number)
+
+    return raffles_combo_number
+
+
+def get_value(combo_number):
+    value = 0
+    if combo_number == 5:
+        value = 2.45
+        return value
+    elif combo_number == 10:
+        value = 4.90
+        return value
+    elif combo_number == 15:
+        value = 7.35
+        return value
+    elif combo_number == 30:
+        value = 14.70
+        return value
+    elif combo_number == 50:
+        value = 24.50
+        return value
+    elif combo_number == 100:
+        value = 49.00
+        return value
+    else:
+        return Response({'message': 'The price of combo is not exists', 'datetime': datetime.now},
+                        status=status.HTTP_400_BAD_REQUEST)

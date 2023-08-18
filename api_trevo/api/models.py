@@ -25,7 +25,7 @@ class UserManager(BaseUserManager):
             raise ValueError('Superuser must have is_staff = True')
         if not extra_fields.get('is_superuser'):
             raise ValueError('Superuser must have is_superuser = True')
-        return self.create_user(name=name, phone=phone, role=role,email=email, password=password, **extra_fields)
+        return self.create_user(name=name, phone=phone, role=role, email=email, password=password, **extra_fields)
 
 
 class UserModel(AbstractBaseUser):
@@ -67,6 +67,11 @@ class RaffleTicket(models.Model):
     combo_number = models.IntegerField()
     raffle = ArrayField(models.IntegerField(), blank=True, null=True)
     user = models.ForeignKey('UserModel', on_delete=models.DO_NOTHING, related_name='raffles')
+
+    def save(self, *args, **kwargs):
+        if self.raffle is not None:
+            self.raffle = list(self.raffle)
+        super(RaffleTicket, self).save(*args, **kwargs)
 
 
 class Payment(models.Model):
