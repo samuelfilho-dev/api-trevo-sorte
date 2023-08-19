@@ -13,5 +13,5 @@ urlpatterns = [
     path('auth/token/verify', TokenVerifyView.as_view(), name='verify_token'),
     path('auth/token/refresh', TokenRefreshView.as_view(), name='refresh_token'),
 
-    path('raffles/<int:combo_number>', views.combo_number, name='combo_number')
+    path('raffles/<int:combo_number>', views.generate_combo_number, name='combo_number')
 ]

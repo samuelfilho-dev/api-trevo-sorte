@@ -1,6 +1,4 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework.decorators import permission_classes
-from rest_framework.permissions import IsAuthenticated
 from .token_utils import decode_token
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -93,9 +91,9 @@ def get_update_delete_user(request, user_id):
 
 
 @api_view(['GET'])
-def combo_number(request):
-    if request.GET:
-        raffles_combo_number = create_raffles_combo_number(request, combo_number)
+def generate_combo_number(request, combo_number):
+    if request.method == 'GET':
+        raffles_combo_number = create_raffles_combo_number(combo_number)
         return Response(raffles_combo_number)
 
 
@@ -104,7 +102,7 @@ def get_token(header_token):
         token = header_token.split(' ')[1]
         return token
     else:
-        return {'message': 'Failed a Decoded Token', 'timestamp': datetime.now}
+        return {'message': 'Failed a Decoded Token', 'timestamp': datetime.now()}
 
 
 def verify_user(token):

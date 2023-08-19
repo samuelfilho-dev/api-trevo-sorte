@@ -84,8 +84,7 @@ def create_combo_number(combo_number):
     # Add Filter Rules
 
     if combo_number not in [5, 10, 15, 30, 50, 100]:
-        return Response({'message:': 'This Combo Number is not exists', 'datetime': datetime.now()},
-                        status=status.HTTP_400_BAD_REQUEST)
+        return {'message:': 'This Combo Number is not exists', 'timestamp': datetime.now()},
 
     raffles_combo_number = np.random.choice(raffles, combo_number)
 
@@ -98,7 +97,7 @@ def get_user(request, user_id):
     return serializer
 
 
-def create_raffles_combo_number(request, combo_number):
+def create_raffles_combo_number(combo_number):
     raffles_combo_number = create_combo_number(combo_number)
     return raffles_combo_number
 
@@ -144,6 +143,3 @@ def delete_user(request, user_id):
     user.status = 'disabled'
     user.raffles.status = 'disabled'
     user.save()
-
-
-
