@@ -3,11 +3,8 @@ from api import views
 
 urlpatterns = [
     path('', views.get_routes, name='get_routes'),
-    path('users', views.get_users, name='get_users'),
-    path('users/create', views.create_user, name='create_user'),
-    path('users/<int:user_id>', views.get_user, name='get_user'),
-    path('users/<int:user_id>/update', views.update_user, name='get_user'),
-    path('users/<int:user_id>/delete', views.delete_user, name='get_user'),
+    path('users', views.create_get_users, name='create_get_users'),
+    path('users/<int:user_id>', views.get_update_delete_user, name='get_update_delete_user'),
 
-    path('raffles/<int:combo_number>', views.create_raffles_combo_number, name='create_raffles_combo_number')
+    path('raffles/<int:combo_number>', views.combo_number, name='combo_number')
 ]
