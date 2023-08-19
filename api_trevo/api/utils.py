@@ -8,6 +8,7 @@ from .mp_service import generate_payment
 from datetime import datetime
 
 import numpy as np
+import jwt
 
 
 def get_users():
@@ -23,6 +24,7 @@ def create_user(request):
     email = data['email']
     phone = data['phone']
     password = data['password']
+    role = data['role']
     combo_number = data['combo_number']
 
     new_user = UserModel.objects.create(
@@ -30,6 +32,7 @@ def create_user(request):
         email=email,
         phone=phone,
         password=password,
+        role=role
     )
     new_user.set_password(password)
     new_user.save()
@@ -141,3 +144,6 @@ def delete_user(request, user_id):
     user.status = 'disabled'
     user.raffles.status = 'disabled'
     user.save()
+
+
+

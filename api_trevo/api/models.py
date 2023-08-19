@@ -38,14 +38,14 @@ class UserModel(AbstractBaseUser):
     email = models.EmailField(max_length=25, unique=True)
     phone = models.CharField(max_length=15)
     password = models.CharField(max_length=100)
-    status = models.CharField(max_length=10, default='active')
+    status = models.CharField(max_length=10, default='pending')
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
     key = models.CharField(null=True, blank=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name', 'role', 'phone']
@@ -64,7 +64,7 @@ class UserModel(AbstractBaseUser):
 
 class RaffleTicket(models.Model):
     status = models.CharField(max_length=10, default='active')
-    combo_name = models.CharField(max_length=30)
+    combo_name = models.CharField(max_length=120)
     combo_number = models.IntegerField()
     raffle = ArrayField(models.IntegerField(), blank=True, null=True)
     payment = models.OneToOneField('Payment', on_delete=models.DO_NOTHING)
