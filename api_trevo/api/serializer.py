@@ -1,5 +1,4 @@
 from rest_framework.serializers import ModelSerializer
-from rest_framework import serializers
 from .models import UserModel
 from .models import Payment
 from .models import RaffleTicket
@@ -12,6 +11,7 @@ class PaymentSerializer(ModelSerializer):
 
 
 class RaffleTicketSerializer(ModelSerializer):
+    payment = PaymentSerializer()
 
     class Meta:
         model = RaffleTicket
@@ -19,9 +19,8 @@ class RaffleTicketSerializer(ModelSerializer):
 
 
 class UserModelSerializer(ModelSerializer):
-    payment = PaymentSerializer()
     raffles = RaffleTicketSerializer(many=True, read_only=True)
 
     class Meta:
         model = UserModel
-        fields = ['id', 'name', 'email', 'phone', 'role', 'create_at', 'update_at', 'payment', 'raffles']
+        fields = ['id', 'name', 'email', 'phone', 'role', 'create_at', 'update_at', 'raffles']

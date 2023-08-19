@@ -1,4 +1,5 @@
-from django.urls import reverse
+import pprint
+
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
@@ -66,29 +67,30 @@ def create_user(request):
     password = data['password']
     combo_number = data['combo_number']
 
-    value = get_value(combo_number)
-
     new_user = UserModel.objects.create(
         name=name,
         email=email,
         phone=phone,
         password=password,
     )
-
-    create_payment(email=email, value=value, user=new_user)
+    new_user.set_password(password)
+    new_user.save()
 
     raffles_combo_number = create_combo_number(combo_number=combo_number)
-    crate_raffle_ticket(combo_number=combo_number, raffles_combo_number=raffles_combo_number, user=new_user)
+    crate_raffle_ticket(combo_number=combo_number, raffles_combo_number=raffles_combo_number, user=new_user,
+                        email=email)
 
     serializer = UserModelSerializer(new_user)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-def create_payment(value, email, user):
+def create_payment(value, email):
     data_payment = generate_payment(
         value=value,
         email=email
     )
+
+    pprint.pprint(data_payment)
 
     new_payment = Payment.objects.create(
         status=data_payment['status'],
@@ -96,8 +98,8 @@ def create_payment(value, email, user):
         value=data_payment['transaction_amount'],
         qr_code=data_payment['point_of_interaction']['transaction_data']['qr_code'],
         qr_code_base64=data_payment['point_of_interaction']['transaction_data']['qr_code_base64'],
+        url=data_payment['point_of_interaction']['transaction_data']['ticket_url'],
         date_expiration=data_payment['date_of_expiration'],
-        user_id=user.id
     )
 
     return new_payment
@@ -109,12 +111,16 @@ def create_raffles_combo_number(request, combo_number):
     return Response(raffles_combo_number, status=status.HTTP_200_OK)
 
 
-def crate_raffle_ticket(combo_number, raffles_combo_number, user):
+def crate_raffle_ticket(email, combo_number, raffles_combo_number, user):
+    value = get_value(combo_number)
+    payment = create_payment(email=email, value=value)
+
     new_raffle_ticket = RaffleTicket.objects.create(
-        combo_name=f'Combo: {combo_number}',
+        combo_name=f'Combo Do {user.name} - {combo_number} Números',
         combo_number=combo_number,
         raffle=raffles_combo_number,
-        user_id=user.id
+        user_id=user.id,
+        payment_id=payment.id
     )
 
     return new_raffle_ticket
@@ -154,5 +160,4 @@ def get_value(combo_number):
         value = 49.00
         return value
     else:
-        return Response({'message': 'The price of combo is not exists', 'datetime': datetime.now},
-                        status=status.HTTP_400_BAD_REQUEST)
+        return {'message': 'The price of combo is not exists', 'datetime': datetime.now}

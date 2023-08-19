@@ -35,13 +35,14 @@ class UserModel(AbstractBaseUser):
     )
 
     name = models.CharField(max_length=50)
-    email = models.CharField(max_length=25, unique=True)
+    email = models.EmailField(max_length=25, unique=True)
     phone = models.CharField(max_length=15)
     password = models.CharField(max_length=100)
     status = models.CharField(max_length=10, default='active')
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
+    key = models.CharField(null=True, blank=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
@@ -63,10 +64,14 @@ class UserModel(AbstractBaseUser):
 
 class RaffleTicket(models.Model):
     status = models.CharField(max_length=10, default='active')
-    combo_name = models.CharField(max_length=15)
+    combo_name = models.CharField(max_length=30)
     combo_number = models.IntegerField()
     raffle = ArrayField(models.IntegerField(), blank=True, null=True)
+    payment = models.OneToOneField('Payment', on_delete=models.DO_NOTHING)
     user = models.ForeignKey('UserModel', on_delete=models.DO_NOTHING, related_name='raffles')
+
+    def __str__(self):
+        return f"Raffle - {self.user.name}"
 
     def save(self, *args, **kwargs):
         if self.raffle is not None:
@@ -80,10 +85,10 @@ class Payment(models.Model):
     value = models.CharField(max_length=10, null=True)
     qr_code = models.CharField(null=True)
     qr_code_base64 = models.TextField(null=True)
+    url = models.TextField(max_length=100, null=True, blank=True)
     date_expiration = models.CharField(max_length=50, null=True)
     create_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
-    user = models.OneToOneField('UserModel', on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Payment of {self.user.name}"
+        return f"Payment of {self.raffleticket.user.name}"
