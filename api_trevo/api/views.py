@@ -10,6 +10,7 @@ from .utils import get_users
 from .utils import get_user
 from .utils import update_user
 from .utils import delete_user
+from .utils import confirm_mail
 from .utils import create_raffles_combo_number
 from datetime import datetime
 
@@ -74,7 +75,7 @@ def get_update_delete_user(request, user_id):
 
     if request.method == 'GET':
         if access:
-            response = get_user(request, user_id)
+            response = get_user(user_id)
             return Response(response.data)
         else:
             return Response({'message': 'This User is not Authenticate', 'timestamp': datetime.now()},
@@ -86,8 +87,14 @@ def get_update_delete_user(request, user_id):
         return Response(response.data)
 
     if request.method == 'DELETE':
-        delete_user(request, user_id)
+        delete_user(user_id)
         return Response('', status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+def confirm_mail_view(request, token):
+    response = confirm_mail(key=token)
+    return Response(response, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])

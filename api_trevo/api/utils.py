@@ -1,3 +1,9 @@
+import pprint
+import uuid
+
+from django.core.mail import send_mail
+from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
 from .models import UserModel
 from .models import Payment
 from .models import RaffleTicket
@@ -10,7 +16,7 @@ import jwt
 
 
 def get_users():
-    users = UserModel.objects.all()
+    users = UserModel.objects.filter(status='active')
     serializer = UserModelSerializer(users, many=True)
     return serializer
 
@@ -32,12 +38,18 @@ def create_user(request):
         password=password,
         role=role
     )
+
+    key = generate_confirm_key()
+
     new_user.set_password(password)
+    new_user.key = key
     new_user.save()
 
     raffles_combo_number = create_combo_number(combo_number=combo_number)
     crate_raffle_ticket(combo_number=combo_number, raffles_combo_number=raffles_combo_number, user=new_user,
                         email=email)
+
+    generate_email(email=email, user=new_user, key=key)
 
     serializer = UserModelSerializer(new_user)
     return serializer
@@ -89,7 +101,7 @@ def create_combo_number(combo_number):
     return raffles_combo_number
 
 
-def get_user(request, user_id):
+def get_user(user_id):
     user = UserModel.objects.get(id=user_id)
     serializer = UserModelSerializer(user)
     return serializer
@@ -121,7 +133,7 @@ def get_value(combo_number):
         value = 49.00
         return value
     else:
-        return {'message': 'The price of combo is not exists', 'datetime': datetime.now}
+        return {'message': 'The price of combo is not exists', 'timestamp': datetime.now()}
 
 
 def update_user(request, user_id):
@@ -136,7 +148,7 @@ def update_user(request, user_id):
     return serializer
 
 
-def delete_user(request, user_id):
+def delete_user(user_id):
     user = UserModel.objects.get(id=user_id)
     raffle = RaffleTicket.objects.get(user_id=user.id)
     payment = Payment.objects.get(raffleticket=raffle.id)
@@ -148,3 +160,45 @@ def delete_user(request, user_id):
     user.save()
     raffle.save()
     payment.save()
+
+
+def generate_confirm_key():
+    return uuid.uuid4().hex
+
+
+def confirm_mail(key):
+    status = 'active'
+
+    try:
+        user = UserModel.objects.get(key=key)
+        user.status = status
+        user.save()
+        return {'message': 'The user were confirmed', 'timestamp': datetime.now()}
+    except ObjectDoesNotExist:
+        return {'message': 'Email Not Confirmed', 'timestamp': datetime.now()}
+
+
+def generate_email(email, user, key):
+    subject = 'Api-Trevo: Confrimar E-mail'
+    message = f"""Prezado(a) {user.name} 
+    
+    Agradecemos a sua solicitação de cadastramento em nosso site!
+    Para que possamos liberar o seu cadastro em nosso sistema, solicitamos a 
+    confirmação de e-mail clickcando no link abaixo:
+    
+    http://localhost:8000/api/users/confrim/mail/{key}
+    
+    Está mensagem foi enviada a você pela empresa XXX.
+    Você está recebendo da empresa XXX, porque está cadastro no nosso sistema.
+    Nenhum e-mail enviado pela empresa XXX tem arquivos anexados ou solicita o preechimento 
+    de senhas e informações cadastrais.
+    
+    
+    """
+
+    send_mail(
+        subject=subject,
+        message=message,
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=[email]
+    )
