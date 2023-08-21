@@ -1,5 +1,3 @@
-from rest_framework.response import Response
-from rest_framework import status
 from .models import UserModel
 from .models import Payment
 from .models import RaffleTicket
@@ -140,6 +138,13 @@ def update_user(request, user_id):
 
 def delete_user(request, user_id):
     user = UserModel.objects.get(id=user_id)
+    raffle = RaffleTicket.objects.get(user_id=user.id)
+    payment = Payment.objects.get(raffleticket=raffle.id)
+
     user.status = 'disabled'
-    user.raffles.status = 'disabled'
+    raffle.status = 'disabled'
+    payment.status = 'disabled'
+
     user.save()
+    raffle.save()
+    payment.save()

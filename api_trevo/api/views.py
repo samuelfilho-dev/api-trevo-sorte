@@ -1,4 +1,6 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAuthenticated
 from .token_utils import decode_token
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -64,13 +66,11 @@ def create_get_users(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
 def get_update_delete_user(request, user_id):
-    access = None
-
-    if 'Authorization' in request.headers:
-        header_token = request.headers['Authorization']
-        token = get_token(header_token)
-        access = verify_user(token)
+    header_token = request.headers['Authorization']
+    token = get_token(header_token)
+    access = verify_user(token)
 
     if request.method == 'GET':
         if access:
@@ -112,3 +112,8 @@ def verify_user(token):
         return True
     else:
         return False
+
+
+def get_email(token):
+    payload = decode_token(token)
+    return payload['email']
