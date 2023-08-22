@@ -104,6 +104,12 @@ def generate_combo_number(request, combo_number):
         return Response(raffles_combo_number)
 
 
+@api_view(['POST'])
+def confirm_webhook(request):
+    print(request.data)
+    return Response(request.data, status=status.HTTP_200_OK)
+
+
 def get_token(header_token):
     if header_token.startswith('Bearer '):
         token = header_token.split(' ')[1]

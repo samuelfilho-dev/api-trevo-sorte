@@ -10,6 +10,8 @@ urlpatterns = [
     path('users/<int:user_id>', views.get_update_delete_user, name='get_update_delete_user'),
     path('users/confrim/mail/<str:token>', views.confirm_mail_view, name='confirm_mail'),
 
+    path('webhooks', views.confirm_webhook, name='confirm_webhook'),
+
     path('auth/token', TokenObtainPairView.as_view(), name='generate_token'),
     path('auth/token/verify', TokenVerifyView.as_view(), name='verify_token'),
     path('auth/token/refresh', TokenRefreshView.as_view(), name='refresh_token'),
