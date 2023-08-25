@@ -1,18 +1,17 @@
-import pprint
-import uuid
-
 from django.core.mail import send_mail
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
+from django.db import transaction
 from .models import UserModel
 from .models import Payment
 from .models import RaffleTicket
 from .serializer import UserModelSerializer
+from .serializer import RaffleTicketSerializer
 from .mp_service import generate_payment
 from datetime import datetime
 
 import numpy as np
-import jwt
+import uuid
 
 
 def get_users():
@@ -21,6 +20,7 @@ def get_users():
     return serializer
 
 
+@transaction.atomic
 def create_user(request):
     data = request.data
 
@@ -45,6 +45,11 @@ def create_user(request):
     new_user.key = key
     new_user.save()
 
+    if new_user.role == 'admin':
+        new_user.raffles = None
+        serializer = UserModelSerializer(new_user)
+        return serializer
+
     raffles_combo_number = create_combo_number(combo_number=combo_number)
     crate_raffle_ticket(combo_number=combo_number, raffles_combo_number=raffles_combo_number, user=new_user,
                         email=email)
@@ -55,6 +60,7 @@ def create_user(request):
     return serializer
 
 
+@transaction.atomic
 def crate_raffle_ticket(email, combo_number, raffles_combo_number, user):
     value = get_value(combo_number)
     payment = create_payment(email=email, value=value)
@@ -70,6 +76,7 @@ def crate_raffle_ticket(email, combo_number, raffles_combo_number, user):
     return new_raffle_ticket
 
 
+@transaction.atomic
 def create_payment(value, email):
     data_payment = generate_payment(
         value=value,
@@ -94,7 +101,7 @@ def create_combo_number(combo_number):
     # Add Filter Rules
 
     if combo_number not in [5, 10, 15, 30, 50, 100]:
-        return {'message:': 'This Combo Number is not exists', 'timestamp': datetime.now()},
+        return {'message:': 'This Combo Number do not exists', 'timestamp': datetime.now()},
 
     raffles_combo_number = np.random.choice(raffles, combo_number)
 
@@ -105,6 +112,24 @@ def get_user(user_id):
     user = UserModel.objects.get(id=user_id)
     serializer = UserModelSerializer(user)
     return serializer
+
+
+def get_raffle(email):
+    try:
+        user = UserModel.objects.get(email=email)
+        serializer = RaffleTicketSerializer(user.raffles, many=True)
+        return serializer.data
+    except ObjectDoesNotExist:
+        return {'message': 'This email do not exists', 'timestamp': datetime.now()}
+
+
+def get_pending_email():
+    try:
+        users = UserModel.objects.filter(status='pending')
+        serializer = UserModelSerializer(users, many=True)
+        return serializer.data
+    except ObjectDoesNotExist:
+        return {'message': 'This Status do not exists', 'timestamp': datetime.now()}
 
 
 def create_raffles_combo_number(combo_number):
@@ -172,6 +197,7 @@ def confirm_mail(key):
     try:
         user = UserModel.objects.get(key=key)
         user.status = status
+        user.is_active = True
         user.save()
         return {'message': 'The user were confirmed', 'timestamp': datetime.now()}
     except ObjectDoesNotExist:

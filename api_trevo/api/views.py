@@ -8,6 +8,8 @@ from rest_framework import status
 from .utils import create_user
 from .utils import get_users
 from .utils import get_user
+from .utils import get_pending_email
+from .utils import get_raffle
 from .utils import update_user
 from .utils import delete_user
 from .utils import confirm_mail
@@ -30,15 +32,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 @api_view(['GET'])
 def get_routes(request):
     routes = [
-        """
-        /users
-        /users/{id}, 
-
-        /auth/token
-        /auth/token/verify
-        /auth/token/refresh
-
-        /raffles/<int:combo_number>'
+        """/users/users/{id},\n\n/auth/token/auth/token/verify/auth/token/refresh\n/raffles/<int:combo_number>'
         """
     ]
     return Response(routes)
@@ -92,6 +86,31 @@ def get_update_delete_user(request, user_id):
 
 
 @api_view(['GET'])
+def pending_email_confirm(request):
+    header_token = request.headers['Authorization']
+    token = get_token(header_token)
+    access = verify_user(token)
+
+    if access:
+        users = get_pending_email()
+        return Response(users)
+    else:
+        return Response({'message': 'This User is not Authenticate', 'timestamp': datetime.now()},
+                        status=status.HTTP_403_FORBIDDEN)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def raffle_view(request):
+    header_token = request.headers['Authorization']
+    token = get_token(header_token)
+    username = get_username(token)
+
+    raffles = get_raffle(email=username)
+    return Response(raffles)
+
+
+@api_view(['GET'])
 def confirm_mail_view(request, token):
     response = confirm_mail(key=token)
     return Response(response, status=status.HTTP_200_OK)
@@ -127,6 +146,6 @@ def verify_user(token):
         return False
 
 
-def get_email(token):
+def get_username(token):
     payload = decode_token(token)
     return payload['email']
