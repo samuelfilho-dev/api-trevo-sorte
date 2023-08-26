@@ -146,15 +146,12 @@ def pending_email_confirm(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def raffle_view(request):
+    user = request.user
     header_token = request.headers['Authorization']
     token = get_token(header_token)
     username = get_username(token)
 
     raffles = get_raffle(email=username)
-
-    if raffles.user.email != username:
-        return Response({'message': 'This User is not Authenticate', 'timestamp': datetime.now()},
-                        status=status.HTTP_403_FORBIDDEN)
 
     return Response(raffles)
 
