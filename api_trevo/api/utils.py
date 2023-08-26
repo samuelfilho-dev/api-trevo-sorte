@@ -20,6 +20,12 @@ def get_users():
     return serializer
 
 
+def get_admin_users():
+    admins = UserModel.objects.filter(role='admin')
+    serializer = UserModelSerializer(admins, many=True)
+    return serializer
+
+
 @transaction.atomic
 def create_user(request):
     data = request.data
@@ -28,7 +34,6 @@ def create_user(request):
     email = data['email']
     phone = data['phone']
     password = data['password']
-    role = data['role']
     combo_number = data['combo_number']
 
     new_user = UserModel.objects.create(
@@ -36,7 +41,6 @@ def create_user(request):
         email=email,
         phone=phone,
         password=password,
-        role=role
     )
 
     key = generate_confirm_key()
@@ -45,16 +49,39 @@ def create_user(request):
     new_user.key = key
     new_user.save()
 
-    if new_user.role == 'admin':
-        new_user.raffles = None
-        serializer = UserModelSerializer(new_user)
-        return serializer
-
     raffles_combo_number = create_combo_number(combo_number=combo_number)
     crate_raffle_ticket(combo_number=combo_number, raffles_combo_number=raffles_combo_number, user=new_user,
                         email=email)
 
     generate_email(email=email, user=new_user, key=key)
+
+    serializer = UserModelSerializer(new_user)
+    return serializer
+
+
+@transaction.atomic
+def create_admin_user(request):
+    data = request.data
+
+    name = data['name']
+    email = data['email']
+    phone = data['phone']
+    password = data['password']
+    role = 'admin'
+    status = 'active'
+
+    new_user = UserModel.objects.create(
+        name=name,
+        email=email,
+        phone=phone,
+        password=password,
+        role=role,
+        is_active=True,
+        status=status,
+    )
+
+    new_user.set_password(password)
+    new_user.save()
 
     serializer = UserModelSerializer(new_user)
     return serializer
@@ -114,6 +141,12 @@ def get_user(user_id):
     return serializer
 
 
+def get_admin(admin_id):
+    admin = UserModel.objects.get(id=admin_id)
+    serializer = UserModelSerializer(admin)
+    return serializer
+
+
 def get_raffle(email):
     try:
         user = UserModel.objects.get(email=email)
@@ -124,12 +157,9 @@ def get_raffle(email):
 
 
 def get_pending_email():
-    try:
-        users = UserModel.objects.filter(status='pending')
-        serializer = UserModelSerializer(users, many=True)
-        return serializer.data
-    except ObjectDoesNotExist:
-        return {'message': 'This Status do not exists', 'timestamp': datetime.now()}
+    users = UserModel.objects.filter(status='pending')
+    serializer = UserModelSerializer(users, many=True)
+    return serializer.data
 
 
 def create_raffles_combo_number(combo_number):
@@ -173,6 +203,18 @@ def update_user(request, user_id):
     return serializer
 
 
+def update_admin(request, admin_id):
+    admin = UserModel.objects.get(id=admin_id)
+    data = request.data
+
+    serializer = UserModelSerializer(instance=admin, data=data)
+
+    if serializer.is_valid():
+        serializer.save()
+
+    return serializer
+
+
 def delete_user(user_id):
     user = UserModel.objects.get(id=user_id)
     raffle = RaffleTicket.objects.get(user_id=user.id)
@@ -185,6 +227,12 @@ def delete_user(user_id):
     user.save()
     raffle.save()
     payment.save()
+
+
+def delete_admin(admin_id):
+    admin = UserModel.objects.get(id=admin_id)
+    admin.status = 'disabled'
+    admin.save()
 
 
 def generate_confirm_key():

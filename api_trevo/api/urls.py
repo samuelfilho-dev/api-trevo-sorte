@@ -10,6 +10,9 @@ urlpatterns = [
     path('users/<int:user_id>', views.get_update_delete_user, name='get_update_delete_user'),
     path('users/confrim/mail/<str:token>', views.confirm_mail_view, name='confirm_mail'),
 
+    path('administrators', views.create_get_admin_view, name='create_get_admin_view'),
+    path('administrators/<int:admin_id>', views.get_update_delete_admin, name='get_update_delete_admin'),
+
     path('users/email/', views.pending_email_confirm, name='pending_email_confirm'),
 
     path('user/raffles', views.raffle_view, name='raffle_view'),

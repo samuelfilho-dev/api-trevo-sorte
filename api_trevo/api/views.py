@@ -8,6 +8,11 @@ from rest_framework import status
 from .utils import create_user
 from .utils import get_users
 from .utils import get_user
+from .utils import create_admin_user
+from .utils import get_admin_users
+from .utils import get_admin
+from .utils import update_admin
+from .utils import delete_admin
 from .utils import get_pending_email
 from .utils import get_raffle
 from .utils import update_user
@@ -68,20 +73,59 @@ def get_update_delete_user(request, user_id):
     access = verify_user(token)
 
     if request.method == 'GET':
-        if access:
-            response = get_user(user_id)
-            return Response(response.data)
-        else:
-            return Response({'message': 'This User is not Authenticate', 'timestamp': datetime.now()},
-                            status=status.HTTP_403_FORBIDDEN)
+        response = get_user(user_id)
+        return Response(response.data)
 
     if request.method == 'PUT':
-        update_user(request, user_id)
         response = update_user(request, user_id)
         return Response(response.data)
 
     if request.method == 'DELETE':
         delete_user(user_id)
+        return Response('', status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def create_get_admin_view(request):
+    header_token = request.headers['Authorization']
+    token = get_token(header_token)
+    access = verify_user(token)
+
+    if not access:
+        Response({'message': 'This User is not Authenticate', 'timestamp': datetime.now()},
+                 status=status.HTTP_403_FORBIDDEN)
+
+    if request.method == 'GET':
+        response = get_admin_users()
+        return Response(response.data)
+
+    if request.method == 'POST':
+        response = create_admin_user(request)
+        return Response(response.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def get_update_delete_admin(request, admin_id):
+    header_token = request.headers['Authorization']
+    token = get_token(header_token)
+    access = verify_user(token)
+
+    if not access:
+        return Response({'message': 'This User is not Authenticate', 'timestamp': datetime.now()},
+                        status=status.HTTP_403_FORBIDDEN)
+
+    if request.method == 'GET':
+        response = get_admin(admin_id)
+        return Response(response.data)
+
+    if request.method == 'PUT':
+        response = update_admin(request, admin_id)
+        return Response(response.data)
+
+    if request.method == 'DELETE':
+        delete_admin(admin_id)
         return Response('', status=status.HTTP_204_NO_CONTENT)
 
 
@@ -107,6 +151,11 @@ def raffle_view(request):
     username = get_username(token)
 
     raffles = get_raffle(email=username)
+
+    if raffles.user.email != username:
+        return Response({'message': 'This User is not Authenticate', 'timestamp': datetime.now()},
+                        status=status.HTTP_403_FORBIDDEN)
+
     return Response(raffles)
 
 
@@ -144,6 +193,10 @@ def verify_user(token):
         return True
     else:
         return False
+
+
+def confirm_user(token):
+    pass
 
 
 def get_username(token):
