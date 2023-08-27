@@ -5,6 +5,7 @@ from .token_utils import decode_token
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
+from .mp_service import confirm_payment
 from .utils import create_user
 from .utils import get_users
 from .utils import get_user
@@ -172,7 +173,13 @@ def generate_combo_number(request, combo_number):
 @api_view(['POST'])
 def confirm_webhook(request):
     print(request.data)
-    return Response(request.data, status=status.HTTP_200_OK)
+
+    data = request.data
+    if 'resource' in data:
+        link = data['resource']
+        confirm_payment(payment_link=link)
+
+    return Response('', status=status.HTTP_200_OK)
 
 
 def get_token(header_token):
@@ -190,10 +197,6 @@ def verify_user(token):
         return True
     else:
         return False
-
-
-def confirm_user(token):
-    pass
 
 
 def get_username(token):
