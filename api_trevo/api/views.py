@@ -20,6 +20,7 @@ from .utils import update_user
 from .utils import delete_user
 from .utils import confirm_mail
 from .utils import create_raffles_combo_number
+from .utils import get_user_raffles_number
 from datetime import datetime
 
 
@@ -147,7 +148,6 @@ def pending_email_confirm(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def raffle_view(request):
-    user = request.user
     header_token = request.headers['Authorization']
     token = get_token(header_token)
     username = get_username(token)
@@ -155,6 +155,17 @@ def raffle_view(request):
     raffles = get_raffle(email=username)
 
     return Response(raffles)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_raffles_number_view(request):
+    header_token = request.headers['Authorization']
+    token = get_token(header_token)
+    username = get_username(token)
+
+    raffle = get_user_raffles_number(email=username)
+    return Response(raffle)
 
 
 @api_view(['GET'])

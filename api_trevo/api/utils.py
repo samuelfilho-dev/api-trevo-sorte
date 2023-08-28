@@ -7,6 +7,7 @@ from .models import Payment
 from .models import RaffleTicket
 from .serializer import UserModelSerializer
 from .serializer import RaffleTicketSerializer
+from .serializer import RaffleTicketListSerializer
 from .mp_service import generate_payment
 from datetime import datetime
 
@@ -151,6 +152,16 @@ def get_raffle(email):
     try:
         user = UserModel.objects.get(email=email)
         serializer = RaffleTicketSerializer(user.raffles, many=True)
+        return serializer.data
+    except ObjectDoesNotExist:
+        return {'message': 'This email do not exists', 'timestamp': datetime.now()}
+
+
+def get_user_raffles_number(email):
+    try:
+        user = UserModel.objects.get(email=email)
+        raffle = RaffleTicket.objects.get(user_id=user)
+        serializer = RaffleTicketListSerializer(raffle)
         return serializer.data
     except ObjectDoesNotExist:
         return {'message': 'This email do not exists', 'timestamp': datetime.now()}

@@ -8,6 +8,7 @@ urlpatterns = [
     path('', views.get_routes, name='get_routes'),
     path('users', views.create_get_users, name='create_get_users'),
     path('users/<int:user_id>', views.get_update_delete_user, name='get_update_delete_user'),
+    path('users/number/raffles', views.get_user_raffles_number_view, name='get_user_raffles_number_view'),
     path('users/confrim/mail/<str:token>', views.confirm_mail_view, name='confirm_mail'),
 
     path('administrators', views.create_get_admin_view, name='create_get_admin_view'),

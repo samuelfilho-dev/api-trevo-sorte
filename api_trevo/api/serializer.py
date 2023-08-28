@@ -18,6 +18,12 @@ class RaffleTicketSerializer(ModelSerializer):
         fields = '__all__'
 
 
+class RaffleTicketListSerializer(ModelSerializer):
+    class Meta:
+        model = RaffleTicket
+        fields = ['raffle']
+
+
 class UserModelSerializer(ModelSerializer):
     raffles = RaffleTicketSerializer(many=True, read_only=True)
 
