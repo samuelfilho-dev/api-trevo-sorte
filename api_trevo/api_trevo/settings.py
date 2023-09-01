@@ -55,12 +55,13 @@ REST_FRAMEWORK = {
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
-        'Token': {
+        'api_key': {
             'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header'
-        },
+            'in': 'header',
+            'name': 'Authorization'
+        }
     },
+    'USE_SESSION_AUTH': False,
 }
 
 SIMPLE_JWT = {
