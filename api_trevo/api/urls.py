@@ -11,12 +11,16 @@ urlpatterns = [
     path('users/number/raffles', views.get_user_raffles_number_view, name='get_user_raffles_number_view'),
     path('users/confrim/mail/<str:token>', views.confirm_mail_view, name='confirm_mail'),
 
-    path('administrators', views.create_get_admin_view, name='create_get_admin_view'),
-    path('administrators/<int:admin_id>', views.get_update_delete_admin, name='get_update_delete_admin'),
-
     path('users/email/', views.pending_email_confirm, name='pending_email_confirm'),
 
     path('user/raffles', views.raffle_view, name='raffle_view'),
+
+    path('payments/approved', views.get_approved_payment_view, name='get_approved_payment_view'),
+    path('payments/purchase/numbers', views.get_purchase_numbers_view, name='get_purchase_numbers_view'),
+    path('payments/pendding/numbers', views.get_pending_numbers_view, name='get_pending_numbers_view'),
+
+    path('administrators', views.create_get_admin_view, name='create_get_admin_view'),
+    path('administrators/<int:admin_id>', views.get_update_delete_admin, name='get_update_delete_admin'),
 
     path('webhooks', views.confirm_webhook, name='confirm_webhook'),
 

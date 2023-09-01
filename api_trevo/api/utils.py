@@ -5,8 +5,12 @@ from django.db import transaction
 from .models import UserModel
 from .models import Payment
 from .models import RaffleTicket
+from .models import NumberList
 from .serializer import UserModelSerializer
 from .serializer import RaffleTicketSerializer
+from .serializer import PaymentSerializer
+from .serializer import NumberPurchaseListSerializer
+from .serializer import NumberPendingListSerializer
 from .serializer import RaffleTicketListSerializer
 from .mp_service import generate_payment
 from datetime import datetime
@@ -125,13 +129,25 @@ def create_payment(value, email):
 
 
 def create_combo_number(combo_number):
-    raffles = [raffle for raffle in range(100_001)]
-    # Add Filter Rules
+    raffles = [raffle for raffle in range(100_000 + 1)]
+
+    db_number_list = NumberList.objects.get(id=1)
+
+    raffles = set(raffles) - (set(db_number_list.purchase_list).union(db_number_list.pending_number_list))
 
     if combo_number not in [5, 10, 15, 30, 50, 100]:
         return {'message:': 'This Combo Number do not exists', 'timestamp': datetime.now()},
 
-    raffles_combo_number = np.random.choice(raffles, combo_number)
+    raffles_combo_number = np.random.choice(list(raffles), combo_number)
+
+    number_list, created = NumberList.objects.get_or_create(id=1)
+
+    if created or number_list.pending_number_list is None:
+        number_list.pending_number_list = list(raffles_combo_number)
+    else:
+        number_list.pending_number_list.extend(raffles_combo_number)
+
+    number_list.save()
 
     return raffles_combo_number
 
@@ -145,6 +161,24 @@ def get_user(user_id):
 def get_admin(admin_id):
     admin = UserModel.objects.get(id=admin_id)
     serializer = UserModelSerializer(admin)
+    return serializer
+
+
+def get_approved_payment():
+    payment = Payment.objects.filter(status='approved')
+    serializer = PaymentSerializer(payment, many=True)
+    return serializer
+
+
+def get_purchase_numbers():
+    purchase_list = NumberList.objects.all()
+    serializer = NumberPurchaseListSerializer(purchase_list, many=True)
+    return serializer
+
+
+def get_pending_numbers():
+    pending_list = NumberList.objects.all()
+    serializer = NumberPendingListSerializer(pending_list, many=True)
     return serializer
 
 

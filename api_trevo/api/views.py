@@ -19,8 +19,11 @@ from .utils import get_raffle
 from .utils import update_user
 from .utils import delete_user
 from .utils import confirm_mail
+from .utils import get_approved_payment
+from .utils import get_purchase_numbers
 from .utils import create_raffles_combo_number
 from .utils import get_user_raffles_number
+from .utils import get_pending_numbers
 from datetime import datetime
 
 
@@ -169,9 +172,36 @@ def get_user_raffles_number_view(request):
 
 
 @api_view(['GET'])
+def get_approved_payment_view(request):
+    response = get_approved_payment()
+    return Response(response.data)
+
+
+@api_view(['GET'])
+def get_purchase_numbers_view(request):
+    response = get_purchase_numbers()
+    return Response(response.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_pending_numbers_view(request):
+    header_token = request.headers['Authorization']
+    token = get_token(header_token)
+    access = verify_user(token)
+
+    if not access:
+        return Response({'message': 'This User is not Authenticate', 'timestamp': datetime.now()},
+                        status=status.HTTP_403_FORBIDDEN)
+
+    response = get_pending_numbers()
+    return Response(response.data)
+
+
+@api_view(['GET'])
 def confirm_mail_view(request, token):
     response = confirm_mail(key=token)
-    return Response(response, status=status.HTTP_200_OK)
+    return Response(response)
 
 
 @api_view(['GET'])

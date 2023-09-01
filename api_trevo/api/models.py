@@ -92,3 +92,18 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment of {self.raffleticket.user.name}"
+
+
+class NumberList(models.Model):
+    pending_number_list = ArrayField(models.IntegerField(), default=list)
+    purchase_list = ArrayField(models.IntegerField(), default=list)
+
+    def save(self, *args, **kwargs):
+        if self.pending_number_list is not None:
+            self.pending_number_list = list(self.pending_number_list)
+        if self.purchase_list is not None:
+            self.purchase_list = list(self.purchase_list)
+        super(NumberList, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return "Purchase List"
