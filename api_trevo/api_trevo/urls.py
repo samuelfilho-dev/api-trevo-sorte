@@ -20,6 +20,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', RedirectView.as_view(url='/api/')),
-    path('api/', include('api.urls'))
+    path('', RedirectView.as_view(url='/api/v1/swagger')),
+    path('api/v1/', include('api.urls')),
 ]
