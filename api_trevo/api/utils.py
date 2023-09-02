@@ -131,16 +131,14 @@ def create_payment(value, email):
 def create_combo_number(combo_number):
     raffles = [raffle for raffle in range(100_000 + 1)]
 
-    db_number_list = NumberList.objects.get(id=1)
+    number_list, created = NumberList.objects.get_or_create(id=1)
 
-    raffles = set(raffles) - (set(db_number_list.purchase_list).union(db_number_list.pending_number_list))
+    raffles = set(raffles) - (set(number_list.purchase_list).union(number_list.pending_number_list))
 
     if combo_number not in [5, 10, 15, 30, 50, 100]:
         return {'message:': 'This Combo Number do not exists', 'timestamp': datetime.now()},
 
     raffles_combo_number = np.random.choice(list(raffles), combo_number)
-
-    number_list, created = NumberList.objects.get_or_create(id=1)
 
     if created or number_list.pending_number_list is None:
         number_list.pending_number_list = list(raffles_combo_number)
