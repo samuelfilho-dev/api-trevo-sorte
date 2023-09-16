@@ -1,7 +1,7 @@
 # API Trevo: A Django RESTful API
 
 
-Este é um projeto que visa fornecer informações sobre o cadastro de usuários de sistema de compra de biletes De rifa. 
+Este é um projeto que visa fornecer informações sobre o cadastro de usuários de sistema de compra de biletes de rifa. 
 O projeto inclui uma API em Django Rest Framework que permite o acesso aos dados dos usuários com seus biletes de rifas
 e o pagamento em formato PIX.
 
@@ -50,7 +50,6 @@ curl --location 'http://127.0.0.1:8000/api/v1/users' \
 
 ```json
 {
-    "id": 8,
     "name": "Killua",
     "email": "killua@email.com",
     "phone": "1111-1111",
@@ -60,9 +59,7 @@ curl --location 'http://127.0.0.1:8000/api/v1/users' \
     "update_at": "2023-09-16T18:04:11.035301Z",
     "raffles": [
         {
-            "id": 3,
             "payment": {
-                "id": 3,
                 "status": "pending",
                 "api_id": "63681908953",
                 "value": "2.45",
@@ -83,7 +80,6 @@ curl --location 'http://127.0.0.1:8000/api/v1/users' \
                 41270,
                 70198
             ],
-            "user": 8
         }
     ]
 }
@@ -93,7 +89,7 @@ curl --location 'http://127.0.0.1:8000/api/v1/users' \
 ## Documentação do Swagger
 
 A documentação da API pode ser encontrada no Swagger. Para visualizá-la,
-acesse: [Documentação do Swagger](http://127.0.0.1:8000/swagger/).
+acesse: [Documentação do Swagger](http://127.0.0.1:8000/api/v1/swagger/).
 
 ---
 ## Licença
