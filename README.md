@@ -20,6 +20,7 @@ e o pagamento em formato PIX.
     </a>
 </p>
 
+---
 ## Configuração
 
 > Tenha instalado o Docker em sua maquina para configurar a API, caso tenha dúvida [Clique aqui!](https://docs.docker.com/engine/install/)
@@ -94,7 +95,7 @@ curl --location 'http://127.0.0.1:8000/api/v1/users' \
 A documentação da API pode ser encontrada no Swagger. Para visualizá-la,
 acesse: [Documentação do Swagger](http://127.0.0.1:8000/swagger/).
 
-
+---
 ## Licença
 
 Este projeto está licenciado sob a licença Comercial. Consulte o
@@ -102,6 +103,7 @@ arquivo [(LICENSE)](https://github.com/samuelfilho-dev/api-trevo-sorte/blob/main
 
 > ⚠️ Essa API está em licença comercial, não use sem autorização do Autor
 
+---
 ## Autor
 
 <table>
