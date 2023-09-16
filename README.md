@@ -97,8 +97,6 @@ acesse: [Documentação do Swagger](http://127.0.0.1:8000/api/v1/swagger/).
 Este projeto está licenciado sob a licença Comercial. Consulte o
 arquivo [(LICENSE)](https://github.com/samuelfilho-dev/api-trevo-sorte/blob/main/LICENSE).
 
-> ⚠️ Essa API está em licença comercial, não use sem autorização do Autor
-
 ---
 ## Autor
 
